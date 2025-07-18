@@ -18,7 +18,7 @@ library(tidyverse)
 # data --------------------------------------------------------------------
 
 data <-
-  read_rds('data/grasses/model_data.rds')
+  read_rds('data/grasses_model_data.rds')
 
 my_species <- 
   model_species <- 
@@ -53,7 +53,7 @@ bg <-
 
 # model -------------------------------------------------------------------
 
-mx <- 
+sdm <- 
   ENMevaluate(
     occs = occs, 
     envs = envs, 
@@ -69,19 +69,19 @@ mx <-
     taxon.name = my_species,
     parallel = TRUE)
 
-# sdm %>% 
-#   write_rds(
-#     paste0(
-#       models,
-#       sp,
-#       "_model_reduced_vars.rds"))
-# 
-# sdm <-  
-#   read_rds(
-#     paste0(
-#       models,
-#       sp,
-#       "_model_reduced_vars.rds"))
+sdm %>%
+  write_rds(
+    paste0(
+      models,
+      sp,
+      "_model_reduced_vars.rds"))
+
+sdm <-
+  read_rds(
+    paste0(
+      models,
+      sp,
+      "_model_reduced_vars.rds"))
 
 # model results -----------------------------------------------------------
 
@@ -133,7 +133,7 @@ predicts::partialResponse(
 
 data <- 
   data %>%
-  filter(species == sp)
+  filter(species == my_species)
 
 predictions <- 
   data %>%
@@ -151,18 +151,6 @@ predictions <-
 
 # best model settings -----------------------------------------------------
 
-ENMeval::evalplot.stats(
-  e = sdm, 
-  stats = "auc.val", 
-  color = "rm", 
-  x.var = "fc", 
-  error.bars = FALSE)
-
-ggsave(
-  'output/figures/best_model_settings_plot.jpg',
-  plot = modelplot,
-  dpi = 300)
-
 sdm@results %>%
   as_tibble() %>%
   mutate(rm = as_factor(rm)) %>% 
@@ -175,6 +163,14 @@ sdm@results %>%
     'salmon')) +
   geom_line(aes(col = rm)) +
   theme_classic()
+
+ggsave(
+  paste0(
+  'output/figures/',
+  my_species, 
+  'best_model_settings_plot.jpg',
+  plot = modelplot,
+  dpi = 300))
 
 # save results -----------------------------------------------------------
 
