@@ -16,6 +16,6 @@ Project structure: The project was built in R V.4.5.0 through RStudio. To facili
 
 ### Raster files
 
-We have included processed raster files containing the environmental information after removing highly correlated predictors (threshold = 0.70) and predictors with low contribution to a first model run. This process is needed due to the large size of the raster files.
+Processed raster files containing the environmental information after removing highly correlated predictors (threshold = 0.70) and predictors with low contribution to a first model run can be downloaded from the [spatial data repository](10.5281/zenodo.16110023). This second repository for spatial data is needed due to the large size of the raster files. 
 
-For the Mojave desert tortoise and each grass species, we provide a raster file named 'species_envs_reduced.tif' within the 'rasters' folder
+For the Mojave Desert tortoise and each grass species, we have provided raster files named 'species_envs_reduced.tif' that must be placed within the 'rasters/present' folder. To model future suitability for the Mojave Desert tortoise please place all raster files starting with 'hadgem' within the 'rasters/future' folder.
