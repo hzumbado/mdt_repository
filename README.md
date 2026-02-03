@@ -2,13 +2,13 @@
 
 Authors and Affiliations
 
-Hector Zumbado-Ulate1, 2, Jeffrey E. Lovich3, Cameron W. Barrows2, Kristy L. Cummings3, Clay F. Noss2, Lynn C. Sweet2
+Hector Zumbado-Ulate<sup>1,2</sup>, Jeffrey E. Lovich<sup>3</sup>, Cameron W. Barrows<sup>2</sup>, Kristy L. Cummings<sup>3</sup>, Clay F. Noss<sup>2</sup>, Lynn C. Sweet<sup>2</sup>
 
-1Escuela de Ciencias Biológicas, Universidad Nacional, Heredia, Costa Rica
+<sup>1</sup>Escuela de Ciencias Biológicas, Universidad Nacional, Heredia, Costa Rica
 
-2Center for Conservation Biology, University of California, Riverside, Riverside, California USA
+<sup>2</sup>Center for Conservation Biology, University of California, Riverside, Riverside, California USA
 
-3U.S. Geological Survey, Southwest Biological Science Center, Flagstaff, Arizona, USA
+<sup>3</sup>U.S. Geological Survey, Southwest Biological Science Center, Flagstaff, Arizona, USA
 
 ## Repository
 
