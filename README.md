@@ -2,14 +2,11 @@
 
 Authors and Affiliations
 
-Hector Zumbado-Ulate¹
-Luis E. Barrios²
-Danelle A. Baronia²
-G. Darrel Jenerette²
-Lynn C. Sweet²
+Hector Zumbado-Ulate1, 2, Jeffrey E. Lovich3, Cameron W. Barrows2, Kristy L. Cummings3, Clay F. Noss2, Lynn C. Sweet2
 
-¹ Escuela de Ciencias Biológicas, Universidad Nacional, Heredia, Costa Rica
-² Center for Conservation Biology, University of California, Riverside, CA 92521, USA
+1Escuela de Ciencias Biológicas, Universidad Nacional, Heredia, Costa Rica
+2Center for Conservation Biology, University of California, Riverside, Riverside, California USA
+3U.S. Geological Survey, Southwest Biological Science Center, Flagstaff, Arizona, USA
 
 ## Repository
 
