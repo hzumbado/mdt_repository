@@ -1,3 +1,7 @@
+# Mojave desert tortoise distribution
+# Script 05
+# SDM Future projections Mojave desert tortoise
+
 # Setup -------------------------------------------------------------------
 
 rm(list = ls())
@@ -14,15 +18,15 @@ future <- 'C:/Users/zumba/Documents/rasters/worldclim/future_1km'
 hadgem <- 'rasters/hadgem3/'
 models <- 'output/models/tortoise/files/'
 predictions1 <- 'output/models/tortoise/predictions/'
-predictions2 <- 'output/models/tortoise/predictions/future/'
+predictions <- 'rasters/future/'
 
 # data --------------------------------------------------------------------
 
 rear_edge <- 
-  read_sf('shapefiles/processed/range_area_2.gpkg') 
+  read_sf('shapefiles/rear_edge.gpkg') 
 
 salton <- 
-  read_sf('shapefiles/geography/salton_sea.gpkg')
+  read_sf('shapefiles/salton_sea.gpkg')
 
 # climatic data -----------------------------------------------------------
 
@@ -36,11 +40,11 @@ mtss <-
   read_rds(
     paste0(
       models, 
-      'model_results.rds')) %>% 
+      'tortoise_sdm_results.rds')) %>% 
   pluck('best_model_results') %>% 
   rename_all(., .funs = tolower) %>% 
   filter(
-    parameter == "Maximum.training.sensitivity.plus.specificity.Cloglog.threshold") %>% 
+    parameter == 'Maximum.training.sensitivity.plus.specificity.Cloglog.threshold') %>% 
   select(value) %>% 
   pull() 
 
@@ -52,7 +56,7 @@ range_map_pol <-
   select(!Suitability)
 
 envs <-
-  rast('rasters/envs_predictions.tif')
+  rast('rasters/present/envs_predictions.tif')
 
 names(envs)
 
@@ -71,7 +75,7 @@ layer_names <-
     future,
     pattern = '.tif',
     full.names = FALSE) %>% 
-  str_remove(".tif") %>% 
+  str_remove('.tif') %>% 
   str_replace_all('-', '_')
 
 future_envs <-
@@ -118,15 +122,16 @@ hadgem_cropped %>%
   names(.) %>%
   walk(~ writeRaster(
     hadgem_cropped[[.]], 
-    paste0(hadgem, ., ".tif"),
+    paste0(hadgem, ., '.tif'),
     overwrite = TRUE))
 
 tm_shape(rear_edge) + 
   tm_borders() +
   tm_shape(HadGEM3_ssp585_2081_2100$wc2.1_30s_bio_15) +
   tm_raster(
-    palette = terrain.colors(500),
-    style = 'cont') 
+    col.scale = tm_scale_continuous(values = terrain.colors(500))) +
+  tm_shape(salton) +
+  tm_polygons('cyan3')
 
 # future predictions ------------------------------------------------------
 
@@ -134,14 +139,14 @@ best_model <-
   read_rds(
     paste0(
       models, 
-      'model_results.rds')) %>% 
+      'tortoise_sdm_results.rds')) %>% 
   pluck('best_model') 
 
 vars <- names(envs)
 
 hadgem_future <- 
   list.files(
-    'rasters/hadgem3',
+    'rasters/future',
     pattern = '.tif',
     full.names = TRUE) %>% 
   map(~ rast(.x) %>%
@@ -149,7 +154,7 @@ hadgem_future <-
         tidyterra::select(all_of(vars)) %>%
         terra::predict(
           best_model, 
-          args = c("outputformat=logistic"), 
+          args = c('outputformat=logistic'), 
           na.rm = T)) %>% 
   set_names(layer_names) 
 
@@ -162,5 +167,5 @@ hadgem_future %>%
     paste0(
       predictions,
       ., 
-      ".tif"), 
+      '.tif'), 
     overwrite = TRUE))

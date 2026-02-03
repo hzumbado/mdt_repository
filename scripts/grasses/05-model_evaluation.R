@@ -1,4 +1,5 @@
 # Mojave desert tortoise distribution
+# Script 05
 # SDM evaluation. Grasses
 
 # setup -------------------------------------------------------------------
@@ -18,9 +19,9 @@ tables <- 'output/tables/'
 
 my_species <- 
   c(
-    "Bromus_rubens" , 
-    "Schismus_arabicus",
-    "Schismus_barbatus")
+    'Bromus_rubens' , 
+    'Schismus_arabicus',
+    'Schismus_barbatus')
 
 # data --------------------------------------------------------------------
 
@@ -36,9 +37,9 @@ model_data <-
     
 # THRESHOLD-DEPENDENT MEASURES (classification) ####
 
-sp <- "Schismus_arabicus"
-#sp <- "Schismus_barbatus"
-#sp <- "Bromus_rubens"
+sp <- 'Schismus_arabicus'
+#sp <- 'Schismus_barbatus'
+#sp <- 'Bromus_rubens'
 
 s <-
   optiThresh(
@@ -47,12 +48,12 @@ s <-
   pch = 20, 
   cex = 0.1, 
   measures = c(
-    "CCR", 
-    "Sensitivity", 
-    "Specificity", 
-    "Precision", 
-    "kappa", 
-    "TSS"))
+    'CCR', 
+    'Sensitivity', 
+    'Specificity', 
+    'Precision', 
+    'kappa', 
+    'TSS'))
 
 # threshMeasures ----------------------------------------------------------
 
@@ -63,13 +64,13 @@ measures <-
   obs = model_data[[sp]]$presence, 
   pred = model_data[[sp]]$prediction,   
   thresh = 'maxSSS', 
-  main = "MXT", 
+  main = 'MXT', 
   measures = c(
-    "CCR", 
-    "Sensitivity", 
-    "Specificity", 
-    "Precision","kappa", 
-    "TSS"))
+    'CCR', 
+    'Sensitivity', 
+    'Specificity', 
+    'Precision','kappa', 
+    'TSS'))
 
 prev <- measures$Prevalence
 mtss  <- measures$Threshold
@@ -77,7 +78,7 @@ mtss  <- measures$Threshold
 eval <- 
   measures$ThreshMeasures %>% 
   as.data.frame() %>%
-  rownames_to_column(var = "Parameter") %>% 
+  rownames_to_column(var = 'Parameter') %>% 
   as_tibble() %>% 
   pivot_wider(names_from = Parameter, values_from = Value)
 

@@ -1,4 +1,5 @@
 # Mojave desert tortoise distribution
+# Script 04
 # Binary predictions and estimation of ESH for grasses
 
 # setup -------------------------------------------------------------------
@@ -18,9 +19,9 @@ models <- 'output/models/grasses/files/'
 
 my_species <- 
   c(
-    "Bromus_rubens" , 
-    "Schismus_arabicus",
-    "Schismus_barbatus")
+    'Bromus_rubens' , 
+    'Schismus_arabicus',
+    'Schismus_barbatus')
 
 # shapefiles --------------------------------------------------------------
 
@@ -65,7 +66,7 @@ x10 <-
     ~ .x %>% 
       filter(
         parameter == 
-          "X10.percentile.training.presence.Cloglog.threshold") %>% 
+          'X10.percentile.training.presence.Cloglog.threshold') %>% 
       dplyr::select(value) %>% 
       pull()) %>% 
   as_vector() 
@@ -128,7 +129,7 @@ mtss <-
     ~ .x %>% 
       filter(
         parameter == 
-          "Maximum.training.sensitivity.plus.specificity.Cloglog.threshold") %>% 
+          'Maximum.training.sensitivity.plus.specificity.Cloglog.threshold') %>% 
       dplyr::select(value) %>% 
       pull()) %>% 
   as_vector() 

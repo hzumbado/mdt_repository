@@ -1,4 +1,5 @@
 # Mojave desert tortoise distribution
+# Script 03
 # SDM mean predictions. Invasive grasses
 
 # setup -------------------------------------------------------------------
@@ -19,9 +20,9 @@ predictions <- 'output/models/grasses/predictions/'
 
 my_species <- 
   c(
-    "Bromus_rubens" , 
-    "Schismus_arabicus",
-    "Schismus_barbatus")
+    'Bromus_rubens' , 
+    'Schismus_arabicus',
+    'Schismus_barbatus')
 
 #  shapefiles -------------------------------------------------------------
 
@@ -82,4 +83,4 @@ points(
   pch = 19,
   cex = 0.75,
   border = 'black',
-  col = c("red", "green", "blue"))
+  col = c('red', 'green', 'blue'))

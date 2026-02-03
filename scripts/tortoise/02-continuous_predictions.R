@@ -1,5 +1,6 @@
 # Mojave desert tortoise distribution
-# SDM continuous predictions
+# Script 02
+# SDM continuous predictions Mojave desert tortoise
 
 # setup -------------------------------------------------------------------
 
@@ -29,8 +30,9 @@ envs <-
 
 best_model <- 
   read_rds(
-  paste0(models, 
-         'model_results.rds')) %>% 
+    paste0(
+      models, 
+      'tortoise_sdm_results.rds')) %>% 
   pluck('best_model')
 
 # continuous predictions --------------------------------------------------
@@ -39,7 +41,7 @@ range_map <-
   terra::predict(
     best_model, 
     envs, 
-    args = c("outputformat=logistic")) 
+    args = c('outputformat=logistic')) 
 
 names(range_map) <- 'Suitability'
 

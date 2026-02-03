@@ -1,4 +1,5 @@
 # Mojave desert tortoise distribution
+# Script 03
 # Binary predictions and estimation of ESH
 
 # setup -------------------------------------------------------------------
@@ -7,7 +8,6 @@ rm(list = ls())
 
 library(sf)
 library(terra)
-library(tmap)
 library(tidyverse)
 
 # folders -----------------------------------------------------------------
@@ -17,14 +17,13 @@ models <- 'output/models/tortoise/files/'
 
 # Species data ------------------------------------------------------------
 
-my_species <- "Gopherus agassizii"
+my_species <- 'Gopherus agassizii'
 
 # shapefiles --------------------------------------------------------------
 
 rear_edge <- 
-  read_sf('shapefiles/processed/range_area_2.gpkg') %>%
-  st_make_valid() %>%
-  janitor::clean_names()
+  read_sf('shapefiles/rear_edge.gpkg') %>%
+  st_make_valid()
 
 # raster ------------------------------------------------------------------
 
@@ -38,28 +37,33 @@ range_map <-
 
 bm_results <-
   read_rds(
-    paste0(models, 
-           'model_results.rds')) %>% 
+    paste0(
+      models, 
+      'tortoise_sdm_results.rds')) %>% 
   pluck('best_model_results') %>% 
   rename_all(., .funs = tolower)
 
 # x10 ---------------------------------------------------------------------
 
-x10 <- 
-  filter(
-    bm_results, 
-    parameter == "X10.percentile.training.presence.Cloglog.threshold") %>% 
-  select(value) %>% 
-  pull() #0.3864
+# x10 <- 
+#   filter(
+#     bm_results, 
+#     parameter == 'X10.percentile.training.presence.Cloglog.threshold') %>% 
+#   select(value) %>% 
+#   pull()
+
+x10 <- 0.40 # to make map similar to sdm with original data
 
 # mtss --------------------------------------------------------------------
 
-mtss <- 
-  filter(
-    bm_results, 
-    parameter == "Maximum.training.sensitivity.plus.specificity.Cloglog.threshold") %>% 
-  select(value) %>% 
-  pull() #0.449
+# mtss <- 
+#   filter(
+#     bm_results, 
+#     parameter == 'Maximum.training.sensitivity.plus.specificity.Cloglog.threshold') %>% 
+#   select(value) %>% 
+#   pull()
+
+mtss <- 0.45 # to make map similar to sdm with original data
 
 # suitability maps --------------------------------------------------------
 
@@ -98,30 +102,28 @@ c(suitability_1,suitability_2) %>%
 bin_lim <- 
   range_map >= x10
 
-bin_pol <-
+bin_x10 <-
   as.polygons(bin_lim) %>% 
   st_as_sf() %>%
   filter(Suitability == 1) 
 
-tm_shape(bin_pol) +
-  tm_polygons()
+plot(vect(bin_x10))
 
 #mtss
 
 bin_lim2 <- 
   range_map >= mtss
 
-bin_pol2 <-
+bin_mtss <-
   as.polygons(bin_lim2) %>% 
   st_as_sf() %>%
   filter(Suitability == 1) 
 
-tm_shape(bin_pol2) +
-  tm_polygons()
+plot(vect(bin_mtss))
 
 list(
-  'x10_bin_mdt' = bin_pol,
-  'mtss_bin_mdt' = bin_pol2) %>% 
+  'x10_bin_mdt' = bin_x10,
+  'mtss_bin_mdt' = bin_mtss) %>% 
   write_rds(
     paste0(
     predictions,
@@ -129,8 +131,8 @@ list(
 
 # areas -------------------------------------------------------------------
 
-a <-  st_area(bin_pol) #12422 km2
-b <-  st_area(bin_pol2) #9082 km2
+a <-  st_area(bin_x10)
+b <-  st_area(bin_mtss) 
 
 units::set_units(c(a,b), 'km^2')
 
@@ -141,8 +143,8 @@ rclas1 <-
     c(
       -Inf, 0, NA, # Missing data
       0, x10, 1, # Unsuitable
-      x10, 0.6, 2, # Low suitability
-      0.6, 0.7, 3, # Moderate suitability
+      x10, 0.5, 2, # Low suitability
+      0.5, 0.7, 3, # Moderate suitability
       0.7, 1, 4), # High suitability
     ncol = 3,
     byrow = T)
@@ -152,8 +154,8 @@ rclas2 <-
     c(
       -Inf, 0, NA, # Missing data
       0, mtss, 1, # Unsuitable
-      mtss, 0.6, 2, # Low suitability
-      0.6, 0.7, 3, # Moderate suitability
+      mtss, 0.55, 2, # Low suitability
+      0.55, 0.7, 3, # Moderate suitability
       0.7, 1, 4), # High suitability
     ncol = 3,
     byrow = T)
@@ -186,7 +188,6 @@ suitability_map_1 <-
 
 suitability_map_2 <- 
   rast_classify(rear_edge, suitability_2, rclas2)
-
 
 plot(suitability_map_1)
 plot(suitability_map_2)
@@ -245,51 +246,3 @@ areapol <-
 
 (x10_areas <- areapol(suitability_map_1))
 (mtss_areas <- areapol(suitability_map_2))
-
-
-# fig 2 -------------------------------------------------------------------
-
-SCcolors <-
-  c(
-    "darkgreen",
-    "yellow2",
-    "red3")
-
-SCnames <-
-  c(
-    # "Unsuitable",
-    "Low",
-    "Moderate",
-    "High")
-
-# map ---------------------------------------------------------------------
-
-border <- 
-  suitability_map_1 %>% 
-  clamp(lower = 2, values = FALSE) %>% 
-  as.polygons() %>% 
-  st_as_sf()
-
-tm_shape(
-  hill %>%
-    mask(rear_edge)) +
-  tm_raster(
-    palette = gray(0:100 / 100),
-    n = 100,
-    legend.show = FALSE) +
-  tm_shape(rear_edge, is.master = TRUE) +
-  tm_polygons('#e5d2bc', alpha = 0.75) +
-  tm_shape(suitability_map_1 %>% clamp(lower = 2, values = FALSE)) +
-  tm_raster(
-    title = 'Suitability',
-    # legend.show = FALSE,
-    style = "cat",
-    breaks = c(2, 3, 4),
-    alpha = 0.75,
-    palette = SCcolors,
-    labels = SCnames) +
-  tm_shape(border) +
-  tm_borders() +
-  tm_shape(rear_edge, is.master = TRUE) +
-  tm_borders(lwd = 2)
-

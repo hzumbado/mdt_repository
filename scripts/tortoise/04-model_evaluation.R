@@ -1,5 +1,6 @@
 # Mojave desert tortoise distribution
-# SDM evaluation
+# Script 04
+# SDM evaluation Mojave desert tortoise
 
 # setup -------------------------------------------------------------------
 
@@ -12,15 +13,14 @@ library(tidyverse)
 # paths -------------------------------------------------------------------
 
 models <- 'output/models/tortoise/files/'
-figs <- 'output/figures/paper/'
-tables <- 'output/tables/tortoise/'
 
 # data' -------------------------------------------------------------------
 
 model_data <-
   read_rds(
-  paste0(models, 
-         'model_results.rds')) %>% 
+    paste0(
+      models, 
+      'tortoise_sdm_results.rds')) %>% 
   pluck('predictions')
 
 # THRESHOLD-DEPENDENT MEASURES (classification) ####
@@ -28,16 +28,16 @@ model_data <-
 s <-
   optiThresh(
     obs = model_data$presence, 
-  pred = model_data$prediction, 
-  pch = 20, 
-  cex = 0.1, 
-  measures = c(
-    "CCR", 
-    "Sensitivity", 
-    "Specificity", 
-    "Precision", 
-    "kappa", 
-    "TSS"))
+    pred = model_data$prediction, 
+    pch = 20, 
+    cex = 0.1, 
+    measures = c(
+      'CCR', 
+      'Sensitivity', 
+      'Specificity', 
+      'Precision', 
+      'kappa', 
+      'TSS'))
 
 # threshMeasures ----------------------------------------------------------
 
@@ -48,14 +48,14 @@ measures <-
     obs = model_data$presence, 
     pred = model_data$prediction, 
   thresh = 'maxSSS', 
-  main = "MXT", 
+  main = 'MXT', 
   measures = c(
-    "CCR", 
-    "Sensitivity", 
-    "Specificity", 
-    "Precision",
-    "kappa", 
-    "TSS"))
+    'CCR', 
+    'Sensitivity', 
+    'Specificity', 
+    'Precision',
+    'kappa', 
+    'TSS'))
 
 prev <- measures$Prevalence
 mtss  <- measures$Threshold
@@ -63,10 +63,11 @@ mtss  <- measures$Threshold
 eval <- 
   measures$ThreshMeasures %>% 
   as.data.frame() %>%
-  rownames_to_column(var = "Parameter") %>% 
+  rownames_to_column(var = 'Parameter') %>% 
   as_tibble() %>% 
-  pivot_wider(names_from = Parameter, values_from = Value)
-
+  pivot_wider(
+    names_from = Parameter, 
+    values_from = Value)
 
 # Boyce index -------------------------------------------------------------
 
@@ -89,14 +90,6 @@ bi <-
   geom_smooth(col = 'orange') +
   theme_classic()
 
-ggsave(
-  paste0(
-    figs, 
-    my_species, 
-    '_boyce.jpg'),
-  plot = bi,
-  dpi = 300)
-
 # evaluation table --------------------------------------------------------
 
 tibble(
@@ -105,9 +98,6 @@ tibble(
   eval,
   boyce = boyce_index$cor) %>% 
   rename_all(tolower) %>%
-  mutate(across(prev:boyce,
-                ~.x %>% round(2)))
-  # write_csv(
-  #   paste0(
-  #     tables, 
-  #     '_eval_table.csv'))
+  mutate(
+    across(prev:boyce,
+           ~.x %>% round(2)))

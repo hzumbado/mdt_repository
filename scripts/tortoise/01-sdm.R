@@ -1,5 +1,6 @@
 # Mojave desert tortoise distribution
-# SDM
+# Script 01
+# SDM Mojave Desert tortoise
 
 # setup -------------------------------------------------------------------
 
@@ -18,7 +19,7 @@ models <- 'output/models/tortoise/files/'
 # data --------------------------------------------------------------------
 
 data <-
-  read_rds('data/data_model_obscured.rds')
+  read_rds('data/tortoise_model_data.rds')
 
 # raster ------------------------------------------------------------------
 
@@ -50,11 +51,11 @@ sdm <-
       list(fc = 
              c('L', 'Q', 'H', 'LQ', 'LH', 'QH', 'LQH'), 
            rm = 1:4), 
-    partitions = "block",
-    algorithm = "maxent.jar", 
+    partitions = 'block',
+    algorithm = 'maxent.jar', 
     doClamp = TRUE, 
     overlap = FALSE,
-    taxon.name = "Gopherus agassizii",
+    taxon.name = 'Gopherus agassizii',
     parallel = TRUE)
 
 model_results <-
@@ -70,7 +71,7 @@ opt.seq <-
   select(
     tune.args,
     auc = 'auc.train',
-    AUC = 'auc.val.avg') #data best model # 
+    AUC = 'auc.val.avg') #data best model
 
 # best model --------------------------------------------------------------
 
@@ -117,7 +118,7 @@ predictions <-
         terra::predict(
           bm, 
           data, 
-          type = "cloglog"))) %>%
+          type = 'cloglog'))) %>%
   select(
     species:y, 
     prediction, 
@@ -148,7 +149,7 @@ sdm %>%
   write_rds(
     paste0(
       models, 
-      "model_reduced_vars.rds"))
+      'tortoise_sdm.rds'))
 
 # save results -----------------------------------------------------------
 
@@ -162,4 +163,4 @@ list(
   write_rds(
     paste0(
       models,
-      'model_results.rds'))
+      'tortoise_sdm_results.rds'))

@@ -1,4 +1,5 @@
 # Mojave desert tortoise distribution
+# Script 02
 # SDM continuous predictions. Invasive grasses
 
 # setup -------------------------------------------------------------------
@@ -60,7 +61,7 @@ range_map <-
   terra::predict(
     best_model, 
     envs[[sp]], 
-    args = c("outputformat=logistic")) 
+    args = c('outputformat=logistic')) 
 
 names(range_map) <- 'Suitability'
 
