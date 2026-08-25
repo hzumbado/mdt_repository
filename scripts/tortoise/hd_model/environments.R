@@ -68,8 +68,11 @@ study_area <-
 
 # worldclim ---------------------------------------------------------------
 
+
+
 wc <- 
   list.files(
+    # 'C:/YOUR_LOCAL_PATH/worldclim/wc_1km',
     'C:/Users/zumba/Documents/rasters/worldclim/wc_1km',
     pattern = '\\.tif$',
     full.names = TRUE) %>% 
@@ -85,6 +88,7 @@ names(wc) <- c('bio_05', 'bio_12')
 
 topography <- 
   list.files(
+    'C:/YOUR_LOCAL_PATH/topography',
     'C:/Users/zumba/Documents/rasters/topography',
     pattern = '\\.tif$',
     full.names = TRUE) %>% 
@@ -103,6 +107,7 @@ compareGeom(topography, wc$bio_05)
 
 soils <- 
   list.files(
+    'C:/YOUR_LOCAL_PATH/soils',
     'C:/Users/zumba/Documents/rasters/soils',
     pattern = '.tif',
     full.names = TRUE) %>% 

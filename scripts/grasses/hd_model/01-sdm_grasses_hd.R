@@ -1,7 +1,6 @@
 # Mojave desert tortoise distribution
-# Modeling
 # Script 01
-# SDM
+# SDM. Invasive grasses
 
 # setup -------------------------------------------------------------------
 
@@ -13,37 +12,55 @@ library(terra)
 library(tidyterra)
 library(tidyverse)
 
-# paths -------------------------------------------------------------------
+# folders -----------------------------------------------------------------
 
-models <- 'output/models/tortoise/files/'
+models <- 'output/models/grasses/files/'
+
+# data --------------------------------------------------------------------
+
+data <-
+  read_rds('data/grasses_model_data.rds')
+
+my_species <- 
+  model_species <- 
+   #'Bromus_rubens' 
+  'Schismus_arabicus'
+  #'Schismus_barbatus'
+
+my_species
+
+# raster ------------------------------------------------------------------
+
+envs <- 
+  rast(
+    paste0(
+      'rasters/present/',
+      my_species,
+      '_envs_reduced.tif'))
+
+# model data --------------------------------------------------------------
+
+occs <- 
+  data %>% 
+  filter(
+    species == my_species,
+    presence == 1) %>% 
+  select(x, y) 
+
+bg <- 
+  data %>% 
+  filter(
+    species == my_species,
+    presence == 0) %>% 
+  select(x, y)
+
+# model -------------------------------------------------------------------
 
 # source ------------------------------------------------------------------
 
 source('scripts/tortoise/hd_model/tss_metrics.R')
 
-# environmental data ------------------------------------------------------
-
-envs <- 
-  rast('rasters/present/envs_stack.tif')
-
-# model data ---------------------------------------------------------
-
-data <-
-  read_rds('data/tortoise_model_data.rds')
-
-occs <- 
-  data %>% 
-  filter(presence == 1) %>% 
-  select(x, y) 
-
-bg <- 
-  data %>% 
-  filter(presence == 0) %>% 
-  select(x, y)
-
-# model -------------------------------------------------------------------
-
-mx <- 
+sdm <- 
   ENMevaluate(
     occs = occs, 
     envs = envs, 
@@ -52,38 +69,38 @@ mx <-
       list(fc = 
              c('L', 'Q', 'H', 'LQ', 'LH', 'QH', 'LQH'), 
            rm = 1:4), 
-    partitions = "block",
-    algorithm = "maxent.jar", 
-    user.eval = tss_metrics, 
+    partitions = 'block',
+    algorithm = 'maxent.jar', 
+    user.eval = tss_metrics,
     doClamp = TRUE, 
     overlap = FALSE,
-    taxon.name = "Gopherus agassizii",
+    taxon.name = my_species,
     parallel = TRUE)
+
+sdm %>%
+  write_rds(
+    paste0(
+      models,
+      my_species,
+      '_model_reduced_vars_hd.rds'))
+
+# sdm <-
+#   read_rds(
+#     paste0(
+#       models,
+#       my_species,
+#       '_model_reduced_vars_hd.rds'))
 
 # model results -----------------------------------------------------------
 
 model_results <-
-  mx@results %>% 
+  sdm@results %>% 
   as_tibble() 
-
-# save maxent model -------------------------------------------------------
-
-mx %>% 
-  write_rds(
-    paste0(
-      models, 
-      "hd_model.rds"))
-
-# mx <-  
-#   read_rds(
-#     paste0(
-#       models, 
-#       "hd_model.rds"))
 
 # model selection ---------------------------------------------------------
 
 ranked_models <- 
-  mx@results %>%
+  sdm@results %>%
   filter(!is.na(or.10p.avg), !is.na(cbi.val.avg)) %>%
   filter(or.10p.avg <= 0.20) %>%
   arrange(
@@ -98,17 +115,18 @@ ranked_models <-
     bi = 'cbi.val.avg', 
     tss = 'tss_max_val.avg',
     auc = 'auc.val.avg', 
-    #tss_10  = 'tss_10ppt_val.avg', 
     ncoef)
 
 opt.seq <-
   ranked_models %>%
   slice(1)
 
+opt.seq
+
 # best model --------------------------------------------------------------
 
 bm <-
-  mx@models %>% 
+  sdm@models %>% 
   pluck(opt.seq$tune.args[1])
 
 bm_results <-
@@ -119,39 +137,65 @@ bm_results <-
   as_tibble() %>%
   rename(Value =  V1)
 
-view(bm_results)
+bm_results %>% 
+  print(n = 56)
 
 # var contribution --------------------------------------------------------
 
 var_contrib <-
-  mx@variable.importance[[opt.seq$tune.args[1]]] %>% 
+  sdm@variable.importance[[opt.seq$tune.args[1]]] %>% 
   as_tibble() %>%
-  mutate(
-    variable = variable %>% 
-      fct_recode(
-        'Annual Precipitation' = 'bio_12',
-        'Coarse Fragment Volume' = 'cvfo',
-        'Sand Content' = 'sand',
-        'Slope' = 'slope',
-        'Topographic Position Index' = 'tpi')) %>% 
   arrange(desc(percent.contribution))
 
+var_contrib
+      
 # response curves --------------------------------------------------------
 
 predicts::partialResponse(
-  mx@models[[opt.seq$tune.args]])
+  sdm@models[[opt.seq$tune.args]])
 
 # predictions ------------------------------------------------------------
+
+data <- 
+  data %>%
+  filter(species == my_species)
+
+vars <- colnames(bm@presence)
+
+data %>%
+  select(all_of(vars)) %>%
+  summarise(
+    across(
+      everything(),
+      ~ sum(is.na(.))))
+
+# repair missing predictor values ----------------------------------------
+
+vars %>%
+  walk(
+    ~ {
+      
+      if(all(is.na(data[[.x]]))){
+        
+        data[[.x]] <<-
+          values(
+            envs[[.x]]
+          )[data$cells]
+      }
+    })
+
+
+# predictions -------------------------------------------------------------
 
 predictions <- 
   data %>%
   mutate(
     prediction =
       as.vector(
-        terra::predict(
-          bm, 
+        predicts::predict(
+          bm,
           data, 
-          type = "cloglog"))) %>%
+          args = 'outputformat=cloglog'))) %>%
   select(
     species:y, 
     prediction, 
@@ -159,21 +203,28 @@ predictions <-
 
 # best model settings -----------------------------------------------------
 
-mx@results %>%
+sdm@results %>%
   as_tibble() %>%
   mutate(rm = as_factor(rm)) %>% 
-  ggplot(aes(x = fc, y = auc.val.avg, group = rm, col = rm)) +
+  ggplot(aes(
+    x = fc, 
+    y = auc.val.avg, 
+    group = rm, 
+    col = rm)) +
   geom_point() +
   scale_color_manual(values = c(
-    "#999999", 
-    "#E69F00", 
-    "#56B4E9", 
+    '#999999', 
+    '#E69F00', 
+    '#56B4E9', 
     'salmon')) +
   geom_line(aes(col = rm)) +
   theme_classic()
 
 ggsave(
-  'output/figures/best_model_settings_plot.jpg',
+  paste0(
+  'output/figures/',
+  my_species, 
+  '_best_model_settings_plot.jpg'),
   dpi = 300)
 
 # save results -----------------------------------------------------------
@@ -188,4 +239,5 @@ list(
   write_rds(
     paste0(
       models,
-      'hd_model_results.rds'))
+      my_species,
+      '_hd_model_results.rds'))
